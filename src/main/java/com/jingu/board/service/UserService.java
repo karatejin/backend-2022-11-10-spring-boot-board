@@ -5,8 +5,9 @@ import org.springframework.stereotype.Service;
 
 import com.jingu.board.dto.auth.GetUserResponseDto;
 import com.jingu.board.dto.response.ResponseDto;
+import com.jingu.board.dto.user.PatchUserDto;
 import com.jingu.board.dto.user.PostUserDto;
-import com.jingu.board.dto.user.PostUserResponseDto;
+import com.jingu.board.dto.user.ResultResponseDto;
 import com.jingu.board.entity.MemberEntity;
 import com.jingu.board.repository.MemberRepository;
 
@@ -17,7 +18,6 @@ public class UserService { // C, R 을 했다.
 	MemberRepository memberRepository;
 
 	public ResponseDto<GetUserResponseDto> getUser(String email) {
-
 
 		// 해당 이메일을 데이터베이스에서 검색
 		MemberEntity member;
@@ -30,12 +30,12 @@ public class UserService { // C, R 을 했다.
 
 			return ResponseDto.setFailed("Not Exist User");
 		}
-		
+
 //		if (member.equals(email))
 //		return ResponseDto.setSuccess("", null);
-		
+
 		// 존재하면 User정보 반환
-		//1
+		// 1
 //		GetUserResponseDto responseData = new GetUserResponseDto();
 //		responseData.setEmail(member.getEmail());
 //		responseData.setNickName(member.getNickname());
@@ -44,8 +44,8 @@ public class UserService { // C, R 을 했다.
 //		responseData.setAddress(member.getAddress());
 //		
 //		return ResponseDto.setSuccess("Get User Success", responseData);
-		
-		//2 GetUserResponseDto 에 builder 가 있어야 한다.
+
+		// 2 GetUserResponseDto 에 builder 가 있어야 한다.
 //		GetUserResponseDto responseData =
 //				GetUserResponseDto
 //				.builder()
@@ -56,8 +56,8 @@ public class UserService { // C, R 을 했다.
 //				.address(member.getAddress())
 //				.build();
 //		return ResponseDto.setSuccess("Get User Success", responseData);
-		
-		//3
+
+		// 3
 //		return ResponseDto.setSuccess("Get User Success", 
 //				new GetUserResponseDto(
 //						member.getEmail(),
@@ -67,13 +67,13 @@ public class UserService { // C, R 을 했다.
 //						member.getAddress()
 //						)
 //				);
-		//선생님
-		
+		// 선생님
+
 		return ResponseDto.setSuccess("Get User Success", new GetUserResponseDto(member));
 
 	}
 
-	public ResponseDto<PostUserResponseDto> postUser(PostUserDto dto) { // 모든 메소드는 검증 해야한다.
+	public ResponseDto<ResultResponseDto> postUser(PostUserDto dto) { // 모든 메소드는 검증 해야한다.
 		// 데이터베이스에 해당 이메일이 존재하는지 체크
 		// 존재한다면 Failed Response 를 반환
 		// Select * From m Where email =?
@@ -116,6 +116,39 @@ public class UserService { // C, R 을 했다.
 		// 존재하는 Entity UPDATE 작업을 수행
 		memberRepository.save(member); // DB 에 save
 
-		return ResponseDto.setSuccess("회원가입에 성공했습니다.", new PostUserResponseDto(true));
+		return ResponseDto.setSuccess("회원가입에 성공했습니다.", new ResultResponseDto(true));
+	}
+
+	public ResponseDto<GetUserResponseDto> patchUser(PatchUserDto dto) {
+		// dto에서 이메일을 가져옴
+		String email = dto.getEmail();
+
+		// repository를 이용해서 데이터베이스에 있는 member 테이블 중
+		// 지정한 email에 해당하는 데이터를 불러옴
+		MemberEntity member = null;
+		try {
+			member = memberRepository.findById(email).get();
+		} catch (Exception e) {
+			// 만약 존재하지 않으면 FailResponse 로 "Not Exist User" 반환
+			return ResponseDto.setFailed("Not Exist User");
+		}
+
+		// RequsetBody 로 받은 nickname 과 profile 로 각각 변경
+		member.setNickname(dto.getNickname());
+		member.setProfile(dto.getProfile());
+
+		// 변경한 entity를 repository를 이용해서 데이터베이스에 적용(저장)
+		memberRepository.save(member);
+		
+		// 결과를 ResponseDto에 담아서 변환
+		return ResponseDto.setSuccess("User Patch Success", new GetUserResponseDto(member));
+	}
+	
+	public ResponseDto<ResultResponseDto> deleteUser(String email){
+		// Use Repository Delete that email in Member's Table at DB
+		// 레포지토리를 이용하여 데이터베이스에 있는 멤버의 테이블중 email에해당하는 데이터 삭제 
+		memberRepository.deleteById(email);
+		
+		return ResponseDto.setSuccess(email, new ResultResponseDto(true));
 	}
 }

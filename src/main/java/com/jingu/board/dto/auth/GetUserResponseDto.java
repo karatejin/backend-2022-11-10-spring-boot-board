@@ -24,6 +24,5 @@ public class GetUserResponseDto { //생성자 get set constructor 만드는 대�
 		this.profile = member.getProfile();
 		this.telNumber = member.getTelNumber();
 		this.address = member.getAddress();
-		
 	}
 }
