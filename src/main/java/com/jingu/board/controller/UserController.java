@@ -1,5 +1,7 @@
 package com.jingu.board.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,11 @@ import com.jingu.board.service.UserService;
 public class UserController {  // 회원가입 프로세스
 	
 	@Autowired UserService userService; // ; 찍으면 저장해라 가만두지 않겠다.
+	
+	@GetMapping("")
+	public ResponseDto<List<GetUserResponseDto>> getAllUser(){
+		return userService.getAllUser();
+	}
 	
 	@GetMapping("{email}") //Create
 	public ResponseDto<GetUserResponseDto> getUser(@PathVariable ("email")String email){
